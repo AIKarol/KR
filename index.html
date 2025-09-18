@@ -5,15 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>KR.AI — Custom AI</title>
 <script>document.documentElement.classList.add('js')</script>
-<meta name="description" content="Single-file custom site: accounts, Pro unlock per account, local AI chat with persistent history, premium animated UI."/>
+<meta name="description" content="Single-file custom site: accounts with avatars, Pro unlock per account, local AI chat with persistent history, premium animated UI."/>
 <style>
 /* ============= THEME ============= */
 :root{
   --bg:#0b1220;--bg2:#0f172a;--glass:#0f1a30cc;--text:#e6eefc;--muted:#9fb0cf;
   --brand:#5aa0ff;--brand2:#00f5d4;--accent:#a78bfa;--border:#1f2a44;--rad:18px;--shadow:0 10px 30px rgba(0,0,0,.45);
   --ring:conic-gradient(from 0deg, var(--brand), var(--brand2), var(--accent), var(--brand));
-  --glow: 1;            /* intensity multiplier */
-  --motion: 1;          /* 1 = full motion, 0 = reduced */
+  --glow: 1; --motion: 1;
 }
 :root.light{
   --bg:#f6f9ff;--bg2:#eef3ff;--glass:#ffffffcc;--text:#0b1220;--muted:#4b5568;
@@ -35,17 +34,9 @@ background:
 .orb{position:absolute;border-radius:50%;filter:blur(38px);opacity:calc(.35*var(--glow));z-index:-2;will-change:transform;transition:transform .25s ease-out}
 .orb.one{top:-120px;left:-80px;width:380px;height:380px;background:radial-gradient(circle at 30% 30%,#5aa0ff,transparent 60%)}
 .orb.two{right:-120px;top:20vh;width:420px;height:420px;background:radial-gradient(circle at 60% 40%,#00f5d4,transparent 60%)}
-
-/* Spotlight following the cursor */
 .spotlight{position:fixed;inset:0;pointer-events:none;z-index:-1;background:radial-gradient(600px 400px at var(--mx,50%) var(--my,30%), rgba(90,160,255,.12), transparent 60%)}
-
-/* Ambient noise overlay */
 .noise{position:fixed;inset:0;pointer-events:none;opacity:.08;mix-blend-mode:soft-light;z-index:-1;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity=".5"/></svg>')}
-
-/* Scroll progress */
 #scrollProgress{position:fixed;inset:0 auto auto 0;height:3px;background:linear-gradient(90deg,var(--brand),var(--brand2),var(--accent));width:0;z-index:100}
-
-/* Cursor aura */
 #cursorAura{position:fixed;left:0;top:0;transform:translate(-50%,-50%);width:18px;height:18px;border-radius:50%;border:1px solid rgba(255,255,255,.45);box-shadow:0 0 30px rgba(255,255,255,.15);pointer-events:none;z-index:99;transition:width .15s ease,height .15s ease,opacity .2s}
 
 /* ============= LAYOUT / NAV ============= */
@@ -61,8 +52,9 @@ header{position:sticky;top:0;z-index:60;backdrop-filter:saturate(160%) blur(10px
 .nav a::after,.nav button.link::after{content:"";position:absolute;left:0;right:0;bottom:-10px;height:2px;transform:scaleX(0);transform-origin:left;background:linear-gradient(90deg,var(--brand),var(--brand2));transition:transform .25s ease}
 .nav a:hover::after,.nav button.link:hover::after{transform:scaleX(1)}
 .badge{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.05);font-size:12px}
+#navAvatar{width:28px;height:28px;border-radius:8px;margin-left:8px;border:1px solid var(--border);object-fit:cover;display:none}
 
-/* Buttons + ripple + magnetic */
+/* Buttons */
 .btn{display:inline-flex;align-items:center;gap:10px;padding:12px 18px;border-radius:14px;border:1px solid transparent;background:linear-gradient(180deg,var(--brand),var(--brand2));color:#07111f;font-weight:800;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:transform .15s ease, box-shadow .2s ease}
 .btn:hover{transform:translateY(-2px);box-shadow:0 14px 36px rgba(0,0,0,.5)}
 .btn:active{transform:translateY(0)}
@@ -84,22 +76,15 @@ section{padding:90px 0}
 @keyframes shine{0%{filter:brightness(1)}50%{filter:brightness(1.15)}100%{filter:brightness(1)}}
 .hero p{margin:0 auto;max-width:860px;color:var(--muted);font-size:clamp(16px,1.6vw,20px)}
 .hero-cta{margin-top:26px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-.hero-rotator{display:inline-block;border-bottom:1px dashed rgba(255,255,255,.25)}
-.hero .marquee{margin-top:26px;mask-image:linear-gradient(90deg,transparent, #000 7%, #000 93%, transparent);overflow:hidden;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,.03)}
-.hero .marquee .line{white-space:nowrap;display:inline-block;padding:8px 0;animation:marq calc(24s*var(--motion)) linear infinite}
-.hero .marquee b{color:var(--text)}
-@keyframes marq{to{transform:translateX(-50%)}}
 
-/* Cards + tilt + sparkle */
+/* Cards */
 .section-title{font-size:36px;text-align:center;margin:0 auto 16px;letter-spacing:-.01em}
 .section-lead{max-width:780px;margin:0 auto;text-align:center;color:var(--muted)}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:36px}
-.card{position:relative;background:var(--glass);border:1px solid var(--border);border-radius:var(--rad);padding:26px;box-shadow:var(--shadow);transform:translateY(0) rotateX(0) rotateY(0);transition:transform .35s ease,border-color .35s ease,box-shadow .35s ease;will-change:transform;perspective:800px;overflow:hidden}
+.card{position:relative;background:var(--glass);border:1px solid var(--border);border-radius:var(--rad);padding:26px;box-shadow:var(--shadow);transform:translateY(0);transition:transform .35s ease,border-color .35s ease,box-shadow .35s ease;will-change:transform;overflow:hidden}
 .card:hover{transform:translateY(-6px);border-color:rgba(90,160,255,.45);box-shadow:0 16px 40px rgba(0,0,0,.5)}
 .card::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;background:conic-gradient(from var(--ang,0deg),var(--brand),var(--brand2),var(--accent),var(--brand));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:flow calc(10s*var(--motion)) linear infinite}
 @keyframes flow{to{--ang:360deg}}
-.card .sparkle{position:absolute;inset:-150% -150% auto auto;width:60%;height:60%;background:radial-gradient(200px 120px at var(--sx,20%) var(--sy,20%), rgba(255,255,255,.18), transparent 60%);mix-blend-mode:overlay;opacity:0;pointer-events:none;transition:opacity .25s}
-.card:hover .sparkle{opacity:1}
 .icon{display:inline-flex;align-items:center;justify-content:center;height:48px;width:48px;border-radius:12px;background:linear-gradient(180deg,rgba(90,160,255,.18),rgba(0,245,212,.12));border:1px solid var(--border);margin-bottom:12px}
 .icon svg{width:26px;height:26px;opacity:.9}
 
@@ -114,16 +99,18 @@ section{padding:90px 0}
 .msgs{flex:1;overflow:auto;padding:18px;display:flex;flex-direction:column;gap:14px}
 .msg{display:flex;gap:12px;animation:bubbleIn calc(.28s*var(--motion)) ease-out}
 @keyframes bubbleIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.avatar{flex:0 0 36px;height:36px;width:36px;border-radius:10px;background:#0b162a;border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
+.avatar{flex:0 0 36px;height:36px;width:36px;border-radius:10px;background:#0b162a;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover;display:block}
 .msg.user .avatar{background:linear-gradient(180deg,#122244,#1a2c50)}
-.bubble{background:#0b162acc;border:1px solid var(--border);border-radius:14px;padding:12px 14px;max-width:80%}
+.bubble{background:#0b162acc;border:1px solid var(--border);border-radius:14px;padding:12px 14px;max-width:80%;line-height:1.5}
 .msg.user .bubble{background:linear-gradient(180deg,#12213d,#122547)}
-.msg.assistant .avatar{background:#0b162a url('logo.png') center/cover no-repeat}
+.msg.assistant .avatar{background:#0b162a}
 .typing{display:inline-block;min-width:38px}
 .typing i{display:inline-block;width:6px;height:6px;margin:0 2px;border-radius:50%;background:#9fb0cf;opacity:.6;animation:tdot calc(1s*var(--motion)) infinite}
 .typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
 @keyframes tdot{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-3px)}}
-.composer{display:flex;gap:10px;padding:12px;border-top:1px solid var(--border);background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.02))}
+.composer{display:flex;gap:10px;padding:12px;border-top:1px solid var(--border);background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.02));align-items:flex-start}
+#meThumb{width:40px;height:40px;border-radius:12px;border:1px solid var(--border);object-fit:cover}
 .composer textarea{flex:1;min-height:46px;max-height:160px;resize:vertical;background:#0b162a;color:var(--text);border:1px solid var(--border);border-radius:12px;padding:12px 14px}
 .composer button{white-space:nowrap}
 .hint{font-size:12px;color:var(--muted);padding:0 12px 12px}
@@ -148,7 +135,7 @@ section{padding:90px 0}
 footer{border-top:1px solid var(--border);background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.02));padding:28px 0;color:var(--muted)}
 .foot{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
 
-/* Utilities */
+/* Utilities / Modals / FAB */
 .reveal{opacity:1;transform:none}
 .js .reveal{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
 .js .reveal.visible{opacity:1;transform:none}
@@ -157,13 +144,9 @@ footer{border-top:1px solid var(--border);background:linear-gradient(180deg,rgba
 .banner{background:#162136;border:1px solid var(--border);padding:12px 14px;border-radius:12px;margin:10px 0;color:#cbd5e1}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0b162a;border:1px solid var(--border);padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);display:none}
 .toast.show{display:block}
-
-/* Modals */
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:80}
 .modal .box{background:var(--glass);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:20px;min-width:320px;max-width:560px}
 .modal input,.modal textarea,.modal select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#0b162a;color:var(--text);margin:8px 0}
-
-/* FAB */
 #toTop{position:fixed;right:18px;bottom:18px;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(180deg,var(--brand),var(--brand2));border:1px solid rgba(255,255,255,.2);box-shadow:var(--shadow);cursor:pointer;z-index:60;opacity:0;transform:translateY(20px);transition:opacity .25s, transform .25s}
 #toTop.show{opacity:1;transform:none}
 
@@ -171,9 +154,6 @@ footer{border-top:1px solid var(--border);background:linear-gradient(180deg,rgba
 #palette{display:none}
 #palette.show{display:flex}
 .palette-list button{display:block;width:100%;text-align:left;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.03);margin-top:8px}
-
-/* Settings gear */
-#settingsBtn{margin-left:10px}
 
 /* Responsive */
 @media (max-width:980px){
@@ -205,6 +185,7 @@ footer{border-top:1px solid var(--border);background:linear-gradient(180deg,rgba
         <a href="#faq">FAQ</a>
         <span id="proBadge" class="badge" style="display:none">Pro account</span>
         <button id="authBtn" class="link">Sign in</button>
+        <img id="navAvatar" alt="me"/>
         <button id="settingsBtn" class="link">Settings</button>
         <a id="modeToggle" href="#" aria-label="Toggle theme" style="margin-left:6px">🌙</a>
       </nav>
@@ -217,35 +198,10 @@ footer{border-top:1px solid var(--border);background:linear-gradient(180deg,rgba
       <span class="eyebrow reveal">Fully custom. Built from zero.</span>
       <h1 class="reveal"><span class="grad">KR.AI</span> — custom AI by <b>Karol Rutkowski</b></h1>
       <p class="reveal">Glass UI, parallax, micro-interactions, flowing borders and token streaming from a local model. No third-party brand names in the UI.</p>
-      <p class="reveal">Focus: <span class="hero-rotator" id="rotator">copywriting</span></p>
       <div class="hero-cta reveal">
         <a class="btn magnetic" href="#chat" id="jumpToChat" data-ripple>Open AI Chat</a>
         <a class="btn outline magnetic" href="#features" data-ripple>Explore features</a>
       </div>
-
-      <!-- premium ticker -->
-      <div class="marquee reveal">
-        <div class="line">
-          <span style="padding:0 28px">Ultra-smooth streaming</span> •
-          <span style="padding:0 28px">Local WebGPU engine</span> •
-          <span style="padding:0 28px">Offline demo fallback</span> •
-          <span style="padding:0 28px">Account-bound Pro unlock</span> •
-          <span style="padding:0 28px">Persistent chat history</span> •
-          <span style="padding:0 28px">Animated glass design</span> •
-          <span style="padding:0 28px">Accent theming</span> •
-          <span style="padding:0 28px">Command palette (⌘/Ctrl+K)</span>
-          <!-- clone for seamless loop -->
-          <span style="padding:0 28px">Ultra-smooth streaming</span> •
-          <span style="padding:0 28px">Local WebGPU engine</span> •
-          <span style="padding:0 28px">Offline demo fallback</span> •
-          <span style="padding:0 28px">Account-bound Pro unlock</span> •
-          <span style="padding:0 28px">Persistent chat history</span> •
-          <span style="padding:0 28px">Animated glass design</span> •
-          <span style="padding:0 28px">Accent theming</span> •
-          <span style="padding:0 28px">Command palette (⌘/Ctrl+K)</span>
-        </div>
-      </div>
-
       <div id="gpuBanner" class="wrap" style="max-width:820px;margin:20px auto 0"></div>
     </section>
 
@@ -253,36 +209,18 @@ footer{border-top:1px solid var(--border);background:linear-gradient(180deg,rgba
     <section id="features" class="wrap">
       <h2 class="section-title reveal">Everything that matters</h2>
       <p class="section-lead reveal">100% custom interface. Local model with graceful demo fallback.</p>
-      <div class="grid" id="featureGrid">
-        <article class="card reveal tilt">
-          <div class="sparkle"></div>
+      <div class="grid">
+        <article class="card reveal">
           <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 12h7l-2 9 13-13h-7l2-9-13 13z" stroke-width="1.5"/></svg></div>
-          <h3>Real-time streaming</h3><p>Answers stream token by token with smooth reveal and a typing indicator.</p>
+          <h3>Real-time streaming</h3><p>Streams live, then auto-formats to clean paragraphs & bullet points.</p>
         </article>
-        <article class="card reveal tilt">
-          <div class="sparkle"></div>
+        <article class="card reveal">
           <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="8" stroke-width="1.5"/><path d="M12 4v8l5 3" stroke-width="1.5"/></svg></div>
-          <h3>Premium design</h3><p>Flowing borders, tilt, ripples, spotlight, noise and cursor aura.</p>
+          <h3>Premium design</h3><p>Flowing borders, spotlight, noise texture, magnetic buttons.</p>
         </article>
-        <article class="card reveal tilt">
-          <div class="sparkle"></div>
+        <article class="card reveal">
           <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="7" height="14" rx="2" stroke-width="1.5"/><rect x="14" y="5" width="7" height="14" rx="2" stroke-width="1.5"/></svg></div>
           <h3>Switchable engines</h3><p>Core (fast), Ultra (quality), Fusion (two-pass refine). Toggle live.</p>
-        </article>
-        <article class="card reveal tilt">
-          <div class="sparkle"></div>
-          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 7h16M4 12h16M4 17h16" stroke-width="1.5"/></svg></div>
-          <h3>Command palette</h3><p>Jump anywhere with ⌘/Ctrl+K. Palette lists quick actions.</p>
-        </article>
-        <article class="card reveal tilt">
-          <div class="sparkle"></div>
-          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2l4 7 8 1-6 5 2 8-8-4-8 4 2-8-6-5 8-1 4-7z" stroke-width="1.5"/></svg></div>
-          <h3>Accent themes</h3><p>One-click accent presets. Save is automatic and persistent.</p>
-        </article>
-        <article class="card reveal tilt">
-          <div class="sparkle"></div>
-          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 5h14v14H5z" stroke-width="1.5"/><path d="M9 9h6v6H9z" stroke-width="1.5"/></svg></div>
-          <h3>Settings</h3><p>Reduce motion, hide stars, change glow, dense layout—per account.</p>
         </article>
       </div>
     </section>
@@ -319,6 +257,7 @@ footer{border-top:1px solid var(--border);background:linear-gradient(180deg,rgba
           <div class="msgs" id="msgs"></div>
 
           <div class="composer">
+            <img id="meThumb" alt="me"/>
             <textarea id="input" placeholder="Type your message… (Shift+Enter = new line)"></textarea>
             <button class="btn magnetic" id="send" data-ripple>Send</button>
             <button class="btn outline magnetic" id="stop" title="Stop" data-ripple>Stop</button>
@@ -362,7 +301,7 @@ footer{border-top:1px solid var(--border);background:linear-gradient(180deg,rgba
       <p class="section-lead reveal">Buy once. Pro unlocks Ultra & Fusion engines and extra themes for your account.</p>
 
       <div class="products">
-        <div class="prod reveal tilt">
+        <div class="prod reveal">
           <div class="badge">Starter</div>
           <h4>Core Access</h4>
           <p>Use the fast local engine for personal work.</p>
@@ -370,7 +309,7 @@ footer{border-top:1px solid var(--border);background:linear-gradient(180deg,rgba
           <div style="margin-top:10px"><a class="btn small outline magnetic" href="#chat" data-ripple>Use Core</a></div>
         </div>
 
-        <div class="prod reveal tilt">
+        <div class="prod reveal">
           <div class="badge">Pro</div>
           <h4>Ultra + Fusion</h4>
           <p>Unlock both advanced engines and themes. One-time purchase.</p>
@@ -389,7 +328,7 @@ footer{border-top:1px solid var(--border);background:linear-gradient(180deg,rgba
           </div>
         </div>
 
-        <div class="prod reveal tilt">
+        <div class="prod reveal">
           <div class="badge">Add-ons</div>
           <h4>Brand Kit</h4>
           <p>Logo variants (SVG/PNG), palette & type presets by KR.</p>
@@ -461,7 +400,7 @@ footer{border-top:1px solid var(--border);background:linear-gradient(180deg,rgba
   <div id="toTop" title="Back to top">^</div>
   <div class="toast" id="toast"></div>
 
-  <!-- Auth Modal -->
+  <!-- Auth Modal (avatar on sign-up) -->
   <div class="modal" id="authModal">
     <div class="box">
       <h3 id="authTitle">Sign in</h3>
@@ -478,13 +417,15 @@ footer{border-top:1px solid var(--border);background:linear-gradient(180deg,rgba
         <input id="suName" type="text" placeholder="Full name"/>
         <input id="suEmail" type="email" placeholder="Email"/>
         <input id="suPass" type="password" placeholder="Password (min 6)"/>
+        <label style="font-size:12px;color:var(--muted)">Profile photo (optional)</label>
+        <input id="suAvatar" type="file" accept="image/*"/>
         <button class="btn magnetic" id="doSignUp" data-ripple>Create account</button>
       </div>
       <div style="margin-top:8px;text-align:right"><button class="btn small outline magnetic" id="closeAuth" data-ripple>Close</button></div>
     </div>
   </div>
 
-  <!-- Generic Dialog Modal (rename / confirm / settings forms) -->
+  <!-- Generic Dialog (rename / confirm / settings) -->
   <div class="modal" id="dialog">
     <div class="box">
       <h3 id="dialogTitle">Dialog</h3>
@@ -511,7 +452,18 @@ footer{border-top:1px solid var(--border);background:linear-gradient(180deg,rgba
   </div>
 
 <script>
-/* ===== Canvas stars + parallax orbs ===== */
+/* ===== Helpers: image -> dataURL (resized) ===== */
+function fileToDataURL(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)})}
+async function resizeImage(file,max=128){
+  const url=await fileToDataURL(file);
+  const img=new Image(); img.src=url; await img.decode();
+  const c=document.createElement('canvas'); const scale=max/Math.max(img.width,img.height);
+  c.width=Math.round(img.width*scale); c.height=Math.round(img.height*scale);
+  const ctx=c.getContext('2d'); ctx.imageSmoothingQuality='high'; ctx.drawImage(img,0,0,c.width,c.height);
+  return c.toDataURL('image/png',0.92);
+}
+
+/* ===== Canvas stars + comet ===== */
 (function(){
   const c=document.getElementById('stars'); const dpr=window.devicePixelRatio||1; const ctx=c.getContext('2d');
   let w,h,stars=[]; const N=180; function resize(){w=innerWidth;h=innerHeight;c.width=w*dpr;c.height=h*dpr;c.style.width=w+'px';c.style.height=h+'px';ctx.setTransform(dpr,0,0,dpr,0,0)} resize(); addEventListener('resize',resize);
@@ -519,7 +471,6 @@ footer{border-top:1px solid var(--border);background:linear-gradient(180deg,rgba
   let t=0, comet={x:Math.random()*w,y:-20,s:1.6};
   (function loop(){ctx.clearRect(0,0,w,h); ctx.globalAlpha=.9;
     for(const st of stars){ctx.fillStyle='rgba(255,255,255,.9)'; ctx.beginPath(); ctx.arc(st.x,st.y,st.s,0,Math.PI*2); ctx.fill(); st.y+=st.v; if(st.y>h+5){st.y=-5; st.x=Math.random()*w}}
-    // tiny comet sometimes
     if((t++%420)===0){ comet={x:Math.random()*w,y:-30,s:1.8}; }
     if(comet.y<h+40){ ctx.globalAlpha=.8; ctx.fillStyle='rgba(255,255,255,.9)'; ctx.beginPath(); ctx.arc(comet.x,comet.y,comet.s,0,Math.PI*2); ctx.fill();
       ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(comet.x,comet.y); ctx.lineTo(comet.x-40,comet.y-18); ctx.stroke(); comet.y+=1.2; comet.x+=.2; }
@@ -527,7 +478,7 @@ footer{border-top:1px solid var(--border);background:linear-gradient(180deg,rgba
   })();
 })();
 
-/* Parallax orbs + spotlight + cursor aura + scroll progress */
+/* Parallax / spotlight / aura / progress */
 document.addEventListener('mousemove',(e)=>{
   const {innerWidth:w, innerHeight:h}=window;
   const dx=(e.clientX/w-.5)*2, dy=(e.clientY/h-.5)*2;
@@ -549,28 +500,11 @@ document.addEventListener('scroll', ()=>{
 const io=new IntersectionObserver((es)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible'); io.unobserve(e.target)}}),{threshold:.12});
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
-/* Tilt + sparkle on cards & products */
-function addTilt(el){
-  el.addEventListener('mousemove',e=>{
-    const r=el.getBoundingClientRect(), x=(e.clientX-r.left)/r.width, y=(e.clientY-r.top)/r.height;
-    const rx=(y-.5)*8, ry=(.5-x)*10;
-    el.style.transform=`translateY(-6px) rotateX(${rx}deg) rotateY(${ry}deg)`;
-    const s=el.querySelector('.sparkle'); if(s){ s.style.setProperty('--sx', (x*100)+'%'); s.style.setProperty('--sy', (y*100)+'%'); }
-  });
-  el.addEventListener('mouseleave',()=>el.style.transform='');
-}
-document.querySelectorAll('.tilt,.prod').forEach(addTilt);
-
-/* Magnetic buttons */
+/* Magnetic buttons + ripple */
 document.querySelectorAll('.magnetic').forEach(btn=>{
-  btn.addEventListener('mousemove',e=>{
-    const r=btn.getBoundingClientRect(); const x=e.clientX-(r.left+r.width/2); const y=e.clientY-(r.top+r.height/2);
-    btn.style.transform=`translate(${x*.06}px,${y*.06}px)`;
-  });
+  btn.addEventListener('mousemove',e=>{const r=btn.getBoundingClientRect(); const x=e.clientX-(r.left+r.width/2); const y=e.clientY-(r.top+r.height/2); btn.style.transform=`translate(${x*.06}px,${y*.06}px)`;});
   btn.addEventListener('mouseleave',()=>btn.style.transform='');
 });
-
-/* Button ripple */
 document.addEventListener('click',e=>{
   const b=e.target.closest('.btn[data-ripple]'); if(!b) return;
   const r=b.getBoundingClientRect(); const x=e.clientX-r.left, y=e.clientY-r.top;
@@ -581,13 +515,6 @@ document.addEventListener('click',e=>{
 /* Theme toggles */
 document.getElementById('modeToggle')?.addEventListener('click',(e)=>{e.preventDefault();document.documentElement.classList.toggle('light');e.currentTarget.textContent=document.documentElement.classList.contains('light')?'🌞':'🌙'});
 document.getElementById('toggleTheme')?.addEventListener('click',()=>document.getElementById('modeToggle').click());
-
-/* Hero rotating words */
-(function rotator(){
-  const words=['copywriting','brainstorming','debugging','research','summaries','email drafts'];
-  const el=document.getElementById('rotator'); let i=0;
-  setInterval(()=>{ i=(i+1)%words.length; el.style.opacity=0; setTimeout(()=>{el.textContent=words[i]; el.style.opacity=1;},200); },1700);
-})();
 
 /* Command palette */
 const palette=document.getElementById('palette');
@@ -607,22 +534,18 @@ document.getElementById('nlJoin').addEventListener('click',()=>{
 });
 
 /* ===== Storage (localStorage + IndexedDB fallback) ===== */
-const STORE='krai_users_v4', SESSION='krai_session_v4', GUEST='guest@local', SETTINGS='krai_settings_v1';
+const STORE='krai_users_v5', SESSION='krai_session_v5', GUEST='guest@local', SETTINGS='krai_settings_v1';
 let cache={users:{}, session:null, settings:{}};
-function idbOpen(){return new Promise((res,rej)=>{const r=indexedDB.open('krai_db_v4',1);r.onupgradeneeded=()=>{r.result.createObjectStore('kv')};r.onerror=()=>rej(r.error);r.onsuccess=()=>res(r.result)})}
+function idbOpen(){return new Promise((res,rej)=>{const r=indexedDB.open('krai_db_v5',1);r.onupgradeneeded=()=>{r.result.createObjectStore('kv')};r.onerror=()=>rej(r.error);r.onsuccess=()=>res(r.result)})}
 async function idbGet(k){try{const db=await idbOpen();return await new Promise(s=>{const tx=db.transaction('kv');const st=tx.objectStore('kv');const req=st.get(k);req.onsuccess=()=>s(req.result?JSON.parse(req.result):null);req.onerror=()=>s(null)})}catch{return null}}
 async function idbSet(k,v){try{const db=await idbOpen();return await new Promise(s=>{const tx=db.transaction('kv','readwrite');tx.objectStore('kv').put(JSON.stringify(v),k);tx.oncomplete=()=>s(true);tx.onerror=()=>s(false)})}catch{return false}}
 const storage={async get(k){try{const v=localStorage.getItem(k);if(v!==null) return JSON.parse(v)}catch{} return await idbGet(k)}, async set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{} try{await idbSet(k,v)}catch{}}};
-async function bootLoad(){
-  cache.users = await storage.get(STORE) || {};
-  cache.session = await storage.get(SESSION) || null;
-  cache.settings = await storage.get(SETTINGS) || {};
-}
+async function bootLoad(){cache.users = await storage.get(STORE) || {}; cache.session = await storage.get(SESSION) || null; cache.settings = await storage.get(SETTINGS) || {};}
 function loadUsers(){return cache.users} function saveUsers(u){cache.users=u; storage.set(STORE,u)}
 function getSession(){return cache.session} function setSession(s){cache.session=s; storage.set(SESSION,s)}
 function currentUser(){const s=getSession(); if(!s) return null; const u=loadUsers()[s.email]; return u?{email:s.email, ...u}:null}
 function isGuestUser(u){return u && u.email===GUEST}
-function ensureGuest(){ if(!getSession()){ const users=loadUsers(); if(!users[GUEST]) users[GUEST]={name:'Guest',pass:null,pro:false,chats:[],lastChatId:null}; saveUsers(users); setSession({email:GUEST}); }}
+function ensureGuest(){ if(!getSession()){ const users=loadUsers(); if(!users[GUEST]) users[GUEST]={name:'Guest',pass:null,pro:false,chats:[],lastChatId:null,avatar:null}; saveUsers(users); setSession({email:GUEST}); }}
 
 /* ===== Settings ===== */
 function applySettings(){
@@ -641,15 +564,20 @@ function openSettings(){
       <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="st_hide" ${s.hideStars?'checked':''}/> Hide starfield</label>
       <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="st_glow" ${s.lowGlow?'checked':''}/> Lower glow</label>
       <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="st_dense" ${s.dense?'checked':''}/> Dense layout</label>
+      <hr style="border-color:var(--border);opacity:.4;margin:12px 0">
+      <label>Change profile photo</label>
+      <input id="st_avatar" type="file" accept="image/*"/>
     `,
     okText:'Save',
-    onConfirm:()=>{
+    onConfirm:async ()=>{
       cache.settings = {
         reduceMotion: document.getElementById('st_reduce').checked,
         hideStars: document.getElementById('st_hide').checked,
         lowGlow: document.getElementById('st_glow').checked,
         dense: document.getElementById('st_dense').checked
       };
+      const f=document.getElementById('st_avatar').files?.[0];
+      if(f){ const data=await resizeImage(f,128); const u=currentUser(); const all=loadUsers(); all[u.email].avatar=data; saveUsers(all); reflectAvatar(); }
       storage.set(SETTINGS, cache.settings);
       applySettings();
       showToast('Settings saved');
@@ -658,7 +586,7 @@ function openSettings(){
 }
 document.getElementById('settingsBtn')?.addEventListener('click', openSettings);
 
-/* ===== Auth ===== */
+/* ===== Auth (with avatar on sign-up) ===== */
 const authModal=document.getElementById('authModal');
 function openAuth(){authModal.style.display='flex'} function closeAuth(){authModal.style.display='none'}
 document.getElementById('authBtn').addEventListener('click',()=>{
@@ -667,7 +595,7 @@ document.getElementById('authBtn').addEventListener('click',()=>{
     title:'Sign out',
     bodyHTML:`<p>You are signed in as <b>${u.email}</b>.</p><p>Do you want to sign out?</p>`,
     okText:'Sign out',
-    onConfirm:()=>{ setSession(null); document.getElementById('authBtn').textContent='Sign in'; reflectPro(false); ensureGuest(); renderThreads(); renderThreadMessages(); showToast('Signed out'); }
+    onConfirm:()=>{ setSession(null); document.getElementById('authBtn').textContent='Sign in'; reflectPro(false); reflectAvatar(); ensureGuest(); renderThreads(); renderThreadMessages(); showToast('Signed out'); }
   });
 });
 document.getElementById('closeAuth').onclick=closeAuth;
@@ -680,12 +608,14 @@ document.getElementById('doSignUp').addEventListener('click', async ()=>{
   const name=document.getElementById('suName').value.trim();
   const email=document.getElementById('suEmail').value.trim().toLowerCase();
   const pass=document.getElementById('suPass').value;
+  const avFile=document.getElementById('suAvatar').files?.[0]||null;
   if(!name||!email||pass.length<6){showToast('Fill all fields (password ≥ 6).');return}
   const users=loadUsers(); if(users[email]){showToast('Account already exists. Sign in.');return}
-  users[email]={name, pass:await sha256(pass), pro:false, chats:[], lastChatId:null};
+  let avatar=null; if(avFile){ try{avatar=await resizeImage(avFile,128);}catch{} }
+  users[email]={name, pass:await sha256(pass), pro:false, chats:[], lastChatId:null, avatar};
   // migrate guest chats
-  const g=users[GUEST]; if(g&&g.chats?.length){ users[email].chats=[...g.chats,...users[email].chats]; users[email].lastChatId=users[email].lastChatId||g.lastChatId; users[GUEST]={name:'Guest',pass:null,pro:false,chats:[],lastChatId:null}; }
-  saveUsers(users); setSession({email}); document.getElementById('authBtn').textContent=email; closeAuth(); showToast('Account created'); reflectPro(false); renderThreads(); renderThreadMessages();
+  const g=users[GUEST]; if(g&&g.chats?.length){ users[email].chats=[...g.chats,...users[email].chats]; users[email].lastChatId=users[email].lastChatId||g.lastChatId; users[GUEST]={name:'Guest',pass:null,pro:false,chats:[],lastChatId:null,avatar:g.avatar||null}; }
+  saveUsers(users); setSession({email}); document.getElementById('authBtn').textContent=email; closeAuth(); showToast('Account created'); reflectPro(false); reflectAvatar(); renderThreads(); renderThreadMessages();
 });
 document.getElementById('doSignIn').addEventListener('click', async ()=>{
   const email=document.getElementById('siEmail').value.trim().toLowerCase();
@@ -694,9 +624,19 @@ document.getElementById('doSignIn').addEventListener('click', async ()=>{
   if(!u){showToast('No account. Create one.');return}
   if(u.pass!==await sha256(pass)){showToast('Wrong password.');return}
   // migrate guest chats
-  const g=users[GUEST]; if(g&&g.chats?.length){ users[email].chats=[...g.chats,...users[email].chats]; users[email].lastChatId=users[email].lastChatId||g.lastChatId; users[GUEST]={name:'Guest',pass:null,pro:false,chats:[],lastChatId:null}; saveUsers(users); }
-  setSession({email}); document.getElementById('authBtn').textContent=email; closeAuth(); showToast('Signed in'); reflectPro(u.pro); renderThreads(); restoreChat();
+  const g=users[GUEST]; if(g&&g.chats?.length){ users[email].chats=[...g.chats,...users[email].chats]; users[email].lastChatId=users[email].lastChatId||g.lastChatId; users[GUEST]={name:'Guest',pass:null,pro:false,chats:[],lastChatId:null,avatar:g.avatar||null}; saveUsers(users); }
+  setSession({email}); document.getElementById('authBtn').textContent=email; closeAuth(); showToast('Signed in'); reflectPro(u.pro); reflectAvatar(); renderThreads(); restoreChat();
 });
+
+/* Nav / composer avatar reflect */
+function reflectAvatar(){
+  const u=currentUser();
+  const nav=document.getElementById('navAvatar');
+  const me=document.getElementById('meThumb');
+  const src=u?.avatar||'';
+  if(src){ nav.src=src; nav.style.display='inline-block'; me.src=src; }
+  else{ nav.style.display='none'; me.src=''; }
+}
 
 /* ===== Pro unlock (PayPal) ===== */
 const proBadge=document.getElementById('proBadge');
@@ -752,37 +692,30 @@ function renderThreads(){
   });
 }
 function addMsg(role, html){
-  const msgsEl=document.getElementById('msgs'); const row=document.createElement('div'); row.className='msg '+role;
+  const msgsEl=document.getElementById('msgs');
+  const row=document.createElement('div'); row.className='msg '+role;
   const av=document.createElement('div'); av.className='avatar';
+  // avatar images
+  if(role==='assistant'){ const img=document.createElement('img'); img.src='logo.png'; img.alt='KR'; av.appendChild(img); }
+  else{ const me=currentUser(); if(me?.avatar){ const img=document.createElement('img'); img.src=me.avatar; img.alt='Me'; av.appendChild(img); } }
   const bub=document.createElement('div'); bub.className='bubble'; bub.innerHTML=html;
   row.appendChild(av); row.appendChild(bub); msgsEl.appendChild(row); msgsEl.scrollTop=msgsEl.scrollHeight; return bub;
 }
 function renderThreadMessages(){
   const t=currentThread(); const msgsEl=document.getElementById('msgs'); msgsEl.innerHTML='';
-  if(!t){ msgsEl.innerHTML='<div class="msg assistant"><div class="avatar"></div><div class="bubble">Welcome! Start a new chat from the right panel.</div></div>'; return;}
+  if(!t){ msgsEl.innerHTML='<div class="msg assistant"><div class="avatar"><img src="logo.png" alt="KR"></div><div class="bubble">Welcome! Start a new chat from the right panel.</div></div>'; return;}
   t.msgs.forEach(m=>{
     const row=document.createElement('div'); row.className='msg '+m.role;
     const av=document.createElement('div'); av.className='avatar';
-    const bub=document.createElement('div'); bub.className='bubble';
-    bub.innerHTML=(m.content||'').replace(/\n/g,'<br>');
+    if(m.role==='assistant'){ const img=document.createElement('img'); img.src='logo.png'; img.alt='KR'; av.appendChild(img); }
+    else{ const me=currentUser(); if(me?.avatar){ const img=document.createElement('img'); img.src=me.avatar; img.alt='Me'; av.appendChild(img); } }
+    const bub=document.createElement('div'); bub.className='bubble'; bub.innerHTML=(m.html||escapeHTML(m.content||'')).replace(/\n/g,'<br>');
     row.appendChild(av); row.appendChild(bub); msgsEl.appendChild(row);
   });
   msgsEl.scrollTop=msgsEl.scrollHeight;
 }
-function restoreChat(){
-  const u=currentUser(); if(!u) return;
-  const data=userData(); if(!data) return;
-  if(!data.lastChatId){
-    if(data.chats.length) data.lastChatId=data.chats[0].id;
-    else { const thr=newThread('New chat'); if(!thr) return; }
-    persistUserData(data);
-  }
-  renderThreads(); renderThreadMessages();
-  if((getThread(userData().lastChatId)||{}).msgs?.length) location.hash='#chat';
-}
-document.getElementById('newChat').addEventListener('click',()=>{ if(!requireAuth()) return; const thr=newThread('New chat'); renderThreads(); renderThreadMessages(); document.getElementById('chat').scrollIntoView({behavior:'smooth'}); document.getElementById('input').focus(); });
 
-/* ===== Pretty Dialogs (Rename / Confirm / Settings) ===== */
+/* ===== Pretty Dialogs ===== */
 const dialog=document.getElementById('dialog');
 const dialogTitle=document.getElementById('dialogTitle');
 const dialogBody=document.getElementById('dialogBody');
@@ -798,6 +731,7 @@ function openDialog({title, bodyHTML, okText='OK', cancelText='Cancel', onConfir
   dialogOk.onclick=()=>{ try{ onConfirm&&onConfirm(); } finally{ cleanup(); } };
   dialogCancel.onclick=()=>{ onCancel&&onCancel(); cleanup(); };
 }
+document.getElementById('newChat').addEventListener('click',()=>{ if(!requireAuth()) return; const thr=newThread('New chat'); renderThreads(); renderThreadMessages(); document.getElementById('chat').scrollIntoView({behavior:'smooth'}); document.getElementById('input').focus(); });
 document.getElementById('renameChat').addEventListener('click',()=>{
   if(!requireAuth()) return;
   const t=currentThread(); if(!t) return;
@@ -838,6 +772,33 @@ function setBanner(msg){ const el=document.getElementById('gpuBanner'); if(el) e
 if(!('gpu' in navigator)) setBanner("No WebGPU detected — Demo Mode enabled. Use Chrome/Edge on a recent GPU for local AI.");
 else setBanner("WebGPU detected — the model will load when you send the first message.");
 
+/* ===== Markdown-ish formatter for readability ===== */
+function mdFormat(src){
+  // protect code fences
+  const fences=[]; src=src.replace(/```([\\s\\S]*?)```/g,(m,code)=>{fences.push(code); return `\uFFF0${fences.length-1}\uFFF1`;});
+  let html=escapeHTML(src);
+
+  // headings
+  html=html.replace(/^### (.*)$/gm,'<h4>$1</h4>')
+           .replace(/^## (.*)$/gm,'<h3>$1</h3>')
+           .replace(/^# (.*)$/gm,'<h2>$1</h2>');
+
+  // lists
+  html=html.replace(/(^|\n)(?:- |\* )(.+)(?=\n|$)/g,'$1<li>$2</li>');
+  html=html.replace(/(?:<li>.*<\/li>)(\n<li>.*<\/li>)+/gs,(m)=>`<ul>${m}</ul>`);
+
+  // numbered lists
+  html=html.replace(/(^|\n)(\d+)\. (.+)(?=\n|$)/g,'$1<li>$2. $3</li>');
+  html=html.replace(/(?:<li>\d+\. .*<\/li>)(\n<li>\d+\. .*<\/li>)+/gs,(m)=>`<ol>${m}</ol>`);
+
+  // paragraphs
+  html=html.replace(/\n{2,}/g,'</p><p>').replace(/^/,'<p>').replace(/$/,'</p>');
+
+  // restore fences
+  html=html.replace(/\uFFF0(\d+)\uFFF1/g,(m,i)=>`<pre><code>${escapeHTML(fences[i])}</code></pre>`);
+  return html;
+}
+
 /* ===== AI (WebLLM) + Demo fallback ===== */
 let engine=null, abort=false, demoMode=false;
 const progressBar=document.getElementById('progressBar');
@@ -872,7 +833,7 @@ async function* localStream(messages, config){
   for await (const chunk of resp){ const d=chunk?.choices?.[0]?.delta?.content||""; if(d) yield d; }
 }
 
-/* Send + persist with typing indicator */
+/* Send + persist with typing indicator and final formatting */
 async function handleSend(){
   const u=currentUser(); if(!u){openAuth(); return;}
   let data=userData(); if(!data) return;
@@ -883,45 +844,48 @@ async function handleSend(){
   thr.title = thr.title==='New chat' && val ? val.slice(0,60) : (thr.title||val.slice(0,60));
   thr.msgs.push({role:'user', content:val, ts:Date.now()}); persistUserData(data);
 
-  addMsg('user', val.replace(/\n/g,'<br>'));
+  addMsg('user', escapeHTML(val).replace(/\n/g,'<br>'));
   const out=addMsg('assistant','<span class="typing"><i></i><i></i><i></i></span>');
 
   try{
     await ensureEngine();
 
     if(isWhoCreatedYou(val)){
-      out.innerHTML=''; let acc=''; for await (const ch of demoStream(CUSTOM_CREATOR_REPLY)){ if(abort) break; out.textContent+=ch; acc+=ch; }
-      thr.msgs.push({role:'assistant', content:acc, ts:Date.now()}); persistUserData(data); renderThreads(); return;
+      let acc=''; out.innerHTML='';
+      for await (const ch of demoStream(CUSTOM_CREATOR_REPLY)){ if(abort) break; acc+=ch; out.textContent=acc; }
+      out.innerHTML = mdFormat(acc);
+      thr.msgs.push({role:'assistant', content:acc, html:out.innerHTML, ts:Date.now()}); persistUserData(data); renderThreads(); return;
     }
 
     const mode=engineEl.value;
     const isPro=currentUser()?.pro;
     if((mode==='ultra'||mode==='fusion') && !isPro){
       const msg="[Pro required] Go to Shop to upgrade.";
-      out.textContent=msg; thr.msgs.push({role:'assistant', content:msg, ts:Date.now()}); persistUserData(data); return;
+      out.textContent=msg; thr.msgs.push({role:'assistant', content:msg, html:escapeHTML(msg), ts:Date.now()}); persistUserData(data); return;
     }
 
-    const base=[{role:'system',content:'You are a helpful, concise assistant for this website. Keep answers crisp.'},{role:'user',content:val}];
+    const base=[{role:'system',content:'You are a helpful, concise assistant for this website. Keep answers crisp and prefer short paragraphs and bullet points.'},{role:'user',content:val}];
 
-    out.innerHTML='';
+    let acc=''; out.innerHTML='';
     if(demoMode){
       const demo=`Demo reply (no WebGPU or offline):\n\nYou said: "${val}"\n\nThis is simulated streaming so you can test the UI without providers or keys.`;
-      let acc=''; for await (const ch of demoStream(demo)){ if(abort) break; out.textContent+=ch; acc+=ch; }
-      thr.msgs.push({role:'assistant', content:acc, ts:Date.now()}); persistUserData(data);
+      for await (const ch of demoStream(demo)){ if(abort) break; acc+=ch; out.textContent=acc; }
     }else if(mode==='fusion'){
-      let acc=''; for await (const ch of localStream(base, cfg('core'))){ if(abort) break; out.textContent+=ch; acc+=ch; }
+      for await (const ch of localStream(base, cfg('core'))){ if(abort) break; acc+=ch; out.textContent=acc; }
       if(!abort){
-        const refine={role:'user',content:'Refine your last answer: clearer, shorter, add bullet tips if useful.'};
-        out.textContent+="\n\n— Refining … —\n"; acc+="\n\n— Refining … —\n";
-        for await (const ch of localStream([...base,{role:'assistant',content:acc},refine], cfg('ultra'))){ if(abort) break; out.textContent+=ch; acc+=ch; }
+        const refine={role:'user',content:'Refine your last answer: clearer, shorter, use bullet points where helpful.'};
+        acc+="\n\n— Refining … —\n"; out.textContent=acc;
+        for await (const ch of localStream([...base,{role:'assistant',content:acc},refine], cfg('ultra'))){ if(abort) break; acc+=ch; out.textContent=acc; }
       }
-      thr.msgs.push({role:'assistant', content:acc, ts:Date.now()}); persistUserData(data);
     }else{
-      let acc=''; for await (const ch of localStream(base, cfg(mode))){ if(abort) break; out.textContent+=ch; acc+=ch; }
-      thr.msgs.push({role:'assistant', content:acc, ts:Date.now()}); persistUserData(data);
+      for await (const ch of localStream(base, cfg(mode))){ if(abort) break; acc+=ch; out.textContent=acc; }
     }
+
+    // final pretty format
+    out.innerHTML = mdFormat(acc);
+    thr.msgs.push({role:'assistant', content:acc, html:out.innerHTML, ts:Date.now()}); persistUserData(data);
   }catch(err){
-    const msg='⚠️ '+(err?.message||String(err)); out.textContent=msg; thr.msgs.push({role:'assistant', content:msg, ts:Date.now()}); persistUserData(data);
+    const msg='⚠️ '+(err?.message||String(err)); out.textContent=msg; thr.msgs.push({role:'assistant', content:msg, html:escapeHTML(msg), ts:Date.now()}); persistUserData(data);
   }finally{
     sendBtn.disabled=false; stopBtn.disabled=true; renderThreads();
     document.getElementById('chat').scrollIntoView({behavior:'smooth'});
@@ -951,8 +915,8 @@ document.querySelectorAll('.setAccent').forEach(btn=>{
   await bootLoad(); ensureGuest();
   applySettings();
   const u=currentUser();
-  if(u && !isGuestUser(u)){ document.getElementById('authBtn').textContent=u.email; reflectPro(u.pro); }
-  else { document.getElementById('authBtn').textContent='Sign in'; reflectPro(false); }
+  document.getElementById('authBtn').textContent = (u && !isGuestUser(u)) ? u.email : 'Sign in';
+  reflectPro(u?.pro); reflectAvatar();
   renderThreads(); restoreChat();
 })();
 </script>
